@@ -33,8 +33,8 @@ class MainMenu extends Phaser.Scene {
         //Bottom Zone Variables
         this.buttons = [];
         let bottomZoneHeight = this.cameras.main.displayHeight * 0.22;
-        let bottomZonePadding = [0, 60, 60, 30];
-        let bottomZoneSpacing = 20;
+        let bottomZonePadding = [0, 30, 10, 90];
+        let bottomZoneSpacing = 30;
         let tempZoneHeight = bottomZoneHeight - (bottomZonePadding[0] + bottomZonePadding[3] + bottomZoneSpacing * 1);
 
         //Inner buttons Variables
@@ -44,10 +44,10 @@ class MainMenu extends Phaser.Scene {
 
         //Add Buttons
         for (let i = 0; i < 2; i++){
-            let btn = new ImageButton(this, this.cameras.main.centerX, this.cameras.main.displayHeight - bottomZoneHeight + bottomZonePadding[0] + i * (bottomZoneSpacing + tempZoneHeight/2), null);
+            let btn = new ImageButton(this, this.cameras.main.centerX * 1, this.cameras.main.displayHeight - bottomZoneHeight + bottomZonePadding[0] + i * (bottomZoneSpacing + tempZoneHeight/2), 'transparent');
             btn.setOrigin(0.5, 0);
             btn.setDisplaySize(100, tempZoneHeight / 2);
-            btn.setScale(btn.scaleY * 4.25, btn.scaleY);
+            btn.setScale(btn.scaleY * 4, btn.scaleY);
             this.buttons.push(btn);
             this.add.existing(btn);
 
@@ -56,9 +56,11 @@ class MainMenu extends Phaser.Scene {
             icon.setDisplaySize(btn.displayHeight, btn.displayHeight);
 
             //Add Text
-            let text = this.add.bitmapText(icon.x + icon.displayWidth + innerSpacing, btn.y + btn.displayHeight/2, 'font', texts[i]).setOrigin(0, 0.5);
-            //Todo: See if text scales well
-            //Todo: Add Listeners
+            let text = this.add.bitmapText(icon.x + icon.displayWidth + innerSpacing, btn.y + btn.displayHeight/2, 'set-fire', texts[i]);
+            //text.setFontSize(0.125 * (btn.displayWidth - (innerPadding[1] + innerPadding[2] + innerSpacing + icon.displayWidth)));
+            text.setFontSize(0.5 * icon.displayHeight);
+            text.setOrigin(0, 0.5);
+            text.setTintFill(0x000000);
         }
     }
 }
