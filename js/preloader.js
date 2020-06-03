@@ -17,6 +17,7 @@ class Preloader extends Phaser.Scene {
         this.load.image('logo', 'assets/logo.png');
         this.load.image('peluchin', 'assets/peluchin.png');
         this.load.image('estrella', 'assets/estrella.png');
+        this.load.bitmapFont('font', 'assets/font.png', 'assets/font.fnt');
     }
 
     //If I DON'T need to preload

@@ -31,50 +31,34 @@ class MainMenu extends Phaser.Scene {
         this.peluchin.setScale(this.peluchin.scaleY);
 
         //Bottom Zone Variables
-        // this.buttons = [];
-        // let bottomZoneHeight = this.cameras.main.displayHeight * 0.22;
-        // let bottomZonePadding = [0, 60, 60, 30];
-        // let bottomZoneSpacing = 20;
-        // let tempZoneHeight = bottomZoneHeight - (bottomZonePadding[0] + bottomZonePadding[3] + bottomZoneSpacing * 1);
+        this.buttons = [];
+        let bottomZoneHeight = this.cameras.main.displayHeight * 0.22;
+        let bottomZonePadding = [0, 60, 60, 30];
+        let bottomZoneSpacing = 20;
+        let tempZoneHeight = bottomZoneHeight - (bottomZonePadding[0] + bottomZonePadding[3] + bottomZoneSpacing * 1);
 
-        // //Inner buttons Variables
-        // let innerPadding = [0, 30, 30, 0];
-        // let innerSpacing = 10;
+        //Inner buttons Variables
+        let innerPadding = [0, 30, 30, 0];
+        let innerSpacing = 10;
+        let texts = ["Play", "Leaderboard"];
 
-        // //Add Buttons
-        // for (let i = 0; i < 2; i++){
-        //     let btn = new ImageButton(this, this.cameras.main.centerX, this.cameras.main.displayHeight - bottomZoneHeight + bottomZonePadding[0] + i * (bottomZoneSpacing + tempZoneHeight/2), null);
-        //     btn.setOrigin(0.5, 0);
-        //     btn.setDisplaySize(this.cameras.main.displayWidth - (bottomZonePadding[1] + bottomZonePadding[2]), tempZoneHeight / 2);
-        //     this.buttons.push(btn);
-        //     this.add.existing(btn);
+        //Add Buttons
+        for (let i = 0; i < 2; i++){
+            let btn = new ImageButton(this, this.cameras.main.centerX, this.cameras.main.displayHeight - bottomZoneHeight + bottomZonePadding[0] + i * (bottomZoneSpacing + tempZoneHeight/2), null);
+            btn.setOrigin(0.5, 0);
+            btn.setDisplaySize(100, tempZoneHeight / 2);
+            btn.setScale(btn.scaleY * 4.25, btn.scaleY);
+            this.buttons.push(btn);
+            this.add.existing(btn);
 
-        //     //Button style
-        //     let icon = this.add.image(bottomZonePadding[1] + innerPadding[1], btn.y, 'estrella').setOrigin(0, 0);
-        //     icon.setDisplaySize(btn.displayHeight, btn.displayHeight);
-        // }
+            //Add Icon
+            let icon = this.add.image(btn.x - btn.displayWidth/2 + innerPadding[0], btn.y, 'estrella').setOrigin(0, 0);
+            icon.setDisplaySize(btn.displayHeight, btn.displayHeight);
 
-
-        // this.createButton("Play", centerX, centerY + 32, 300, 100, function() {
-        //     console.log("Play Pressed");
-        // });
-
-        // this.createButton("About", centerX, centerY + 192, 300, 100, function() {
-        //     console.log("About Pressed");
-        // });
+            //Add Text
+            let text = this.add.bitmapText(icon.x + icon.displayWidth + innerSpacing, btn.y + btn.displayHeight/2, 'font', texts[i]).setOrigin(0, 0.5);
+            //Todo: See if text scales well
+            //Todo: Add Listeners
+        }
     }
-
-    // createButton(string, x, y, w, h, callback) {
-    //     let btn = this.add.image(x, y, 'button');
-        
-    //     btn.anchor.setTo(0.5, 0.5);
-    //     btn.width = w;
-    //     btn.height = h;
-
-    //     let txt = this.add.text(btn.x, btn.y, string, {
-    //         font: "14px Arial",
-    //         fill: "#fff",
-    //         align: "center"
-    //     }).setOrigin(0.5);
-    // }
 }
