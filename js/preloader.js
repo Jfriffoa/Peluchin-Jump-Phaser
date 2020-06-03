@@ -8,9 +8,6 @@ class Preloader extends Phaser.Scene {
         this.facebook.once('startgame', this.startGame, this);
         this.facebook.showLoadProgress(this);
 
-        this.load.image('player-idle', 'assets/peluchin-idle.png');
-        this.load.image('player-jump', 'assets/peluchin-jumping.png');
-
         //Preload Main Menu things
         this.load.image('nubes', 'assets/nubes.png');
         this.load.image('menubg', 'assets/dia.png');
@@ -18,6 +15,7 @@ class Preloader extends Phaser.Scene {
         this.load.image('peluchin', 'assets/peluchin.png');
         this.load.image('estrella', 'assets/estrella.png');
         this.load.image('transparent', 'assets/transparent.png');
+        this.load.image('tt', 'assets/tt.png');
         this.load.bitmapFont('set-fire', 'assets/set-fire.png', 'assets/set-fire.fnt');
     }
 
