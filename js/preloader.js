@@ -16,6 +16,7 @@ class Preloader extends Phaser.Scene {
         this.load.image('estrella', 'assets/estrella.png');
         this.load.image('transparent', 'assets/transparent.png');
         this.load.image('tt', 'assets/tt.png');
+        this.load.image('marco', 'assets/marco.png');
         this.load.bitmapFont('set-fire', 'assets/set-fire.png', 'assets/set-fire.fnt');
     }
 

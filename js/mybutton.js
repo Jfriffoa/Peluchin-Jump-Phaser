@@ -1,12 +1,11 @@
 class ImageButton extends Phaser.GameObjects.Image {
     #onPressed = null;
 
-    constructor(scene, x, y, texture, onPressed = null) {
+    constructor(scene, x, y, texture) {
         super(scene, x, y, texture);
         this.setInteractive();
 
         this.isDown = false;
-        this.#onPressed = onPressed;
 
         this.on('pointerdown', () => { this.isDown = true; });
         this.on('pointerup',   () => { this.isDown = false; });

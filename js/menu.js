@@ -3,6 +3,10 @@ class MainMenu extends Phaser.Scene {
         super({ key: 'MainMenu', active: false });
     }
 
+    preload() {
+        this.load.image('profile-pic', this.facebook.getPlayerPhotoURL());
+    }
+
     create() {
         //Add Bg
         this.background = this.add.image(0, 0, 'menubg');
@@ -33,52 +37,77 @@ class MainMenu extends Phaser.Scene {
         this.tt.setScale(this.tt.scaleY);
 
         //Bottom Zone Variables
-        this.buttons = [];
         let bottomZoneHeight = this.cameras.main.displayHeight * 0.22;
         let bottomZonePadding = [0, 10, 10, 90];    // Top, Left, Right, Bottom
         let bottomZoneSpacing = 30;
         let tempZoneHeight = bottomZoneHeight - (bottomZonePadding[0] + bottomZonePadding[3] + bottomZoneSpacing * 1);
 
-        //Inner buttons Variables
-        let innerPadding = [0, 0, 30, 0];          // Top, Left, Right, Bottom
-        let innerSpacing = 10;
-        let texts = ["Play", "Leaderboard"];
+        // //Inner buttons Variables
+        // let innerPadding = [0, 0, 30, 0];          // Top, Left, Right, Bottom
+        // let innerSpacing = 10;
+        // let texts = ["Play", "Leaderboard"];
+        
+        ///////////////////////////////////////////////////////////////////////
+        // Play Button
+        let playZoneHeight = this.cameras.main.displayHeight * 0.12;
+        let playZonePadding = [0, 10, 10, 90];
+        let innerPadding = [0, 0, 0, 0]
+        let innerSpacing = 30;
 
-        //Add Buttons
-        for (let i = 0; i < 2; i++){
-            //Add pressable zone
-            let btn = new ImageButton(this, this.cameras.main.centerX * 1.05, this.cameras.main.displayHeight - bottomZoneHeight + bottomZonePadding[0] + i * (bottomZoneSpacing + tempZoneHeight/2), 'transparent');
-            btn.setOrigin(0.5, 0);
-            btn.setDisplaySize(100, tempZoneHeight / 2);
-            btn.setScale(btn.scaleY * 4.25, btn.scaleY);
-            this.buttons.push(btn);
-            this.add.existing(btn);
+        // Add Button
+        this.playButton = new ImageButton(this, this.cameras.main.centerX * 1.05, this.cameras.main.displayHeight - playZoneHeight + playZonePadding[0], 'transparent');
+        this.playButton.setOrigin(0.5, 0);
+        this.playButton.setDisplaySize(100, playZoneHeight - (playZonePadding[0] + playZonePadding[3]));
+        this.playButton.setScale(this.playButton.scaleY * 3, this.playButton.scaleY);
+        this.add.existing(this.playButton);
 
-            //Add Icon
-            let icon = this.add.image(btn.x - btn.displayWidth/2 + innerPadding[1], btn.y + innerPadding[0], 'estrella').setOrigin(0, 0);
-            let iconSize = btn.displayHeight - (innerPadding[0] + innerPadding[3]);
-            icon.setDisplaySize(iconSize, iconSize);
+        this.playButton.onPressed(() => { this.scene.start('Game') });
+        
+        // Add Icon
+        let icon = this.add.image(this.playButton.x - this.playButton.displayWidth/2, this.playButton.y + innerPadding[0], 'estrella').setOrigin(0, 0);
+        let iconSize = this.playButton.displayHeight - (innerPadding[0] + innerPadding[3]);
+        icon.setDisplaySize(iconSize, iconSize);
 
-            //Add Text
-            let text = this.add.bitmapText(icon.x + icon.displayWidth + innerSpacing, (icon.y + icon.displayHeight/2) * 1.005, 'set-fire', texts[i]);
-            //text.setFontSize(0.125 * (btn.displayWidth - (innerPadding[1] + innerPadding[2] + innerSpacing + icon.displayWidth)));
-            text.setFontSize(0.8 * icon.displayHeight);
-            text.setOrigin(0, 0.5);
-            text.setTintFill(0x000000);
+        // Add Text
+        let text = this.add.bitmapText(icon.x + icon.displayWidth + innerSpacing, (icon.y + icon.displayHeight / 2) * 1.005, 'set-fire', 'Play');
+        text.setFontSize(0.8 * icon.displayHeight);
+        text.setOrigin(0, 0.5);
+        text.setTintFill(0x000000);
 
-            // btn.onPointerUp(() => {
-            //     console.log(texts[i] + " pressed");
-            // });
-        }
+        ///////////////////////////////////////////////////////////////////////
+        // Facebook
+        let fbZoneHeight = this.cameras.main.displayHeight * 0.10;
+        let fbZonePadding = [0, 0, 0, 10];
+        let fbZoneSpacing = 30;
 
-        // Buttons Behaviours
-        this.buttons[0].onPointerUp(() => {
-            this.scene.start('Game');
-        });
+        // Define zone
+        let fbZone = this.add.image(this.cameras.main.centerX, this.cameras.main.displayHeight - (fbZoneHeight + playZoneHeight) + fbZonePadding[0], 'transparent').setOrigin(0.5, 0);
+        fbZone.setDisplaySize(this.cameras.main.displayWidth * 0.8 - (fbZonePadding[1] + fbZonePadding[2]), fbZoneHeight - (fbZonePadding[0] + fbZonePadding[3]));
 
-        // Facebook Player
-        let playerName = this.add.bitmapText(this.cameras.main.displayWidth - 30, 10, 'set-fire', "Welcome " + this.facebook.playerName).setOrigin(1, 0);
+        // Mask Profile Pic
+        let photo = this.textures.createCanvas('player-masked', 123, 129);
+        let source = this.textures.get('profile-pic').getSourceImage();
+        let sourceFrame = this.textures.getFrame('profile-pic');
+        let mask = this.textures.get('estrella').getSourceImage();
+
+        photo.draw(0, 0, mask);
+        photo.getContext().globalCompositeOperation = 'source-in';
+        photo.getContext().drawImage(source, 0, 0, sourceFrame.width, sourceFrame.height, 0, 0, 123, 129);
+        photo.refresh();
+
+        // Add Profile Pic Masked
+        let profilePic = this.add.image(fbZone.x - fbZone.displayWidth/2, fbZone.y, 'player-masked').setOrigin(0, 0);
+        profilePic.setDisplaySize(fbZone.displayHeight, fbZone.displayHeight);
+
+        let frame = this.add.image(fbZone.x - fbZone.displayWidth/2, fbZone.y, 'marco').setOrigin(0, 0);
+        frame.setDisplaySize(fbZone.displayHeight, fbZone.displayHeight);
+
+        // Add Facebook Name
+        let playerName = this.add.bitmapText(profilePic.x + profilePic.displayWidth + fbZoneSpacing, (profilePic.y + profilePic.displayHeight / 2) * 1.005, 'set-fire', "Welcome " + this.facebook.getPlayerName());
+        let newSize = (fbZone.displayWidth - (profilePic.displayWidth + fbZoneSpacing + fbZonePadding[0] + fbZonePadding[3])) * 32 / playerName.width;
+        playerName.setFontSize(Math.min(150, newSize));
+        playerName.setOrigin(0, 0.5);
         playerName.setTintFill(0x000000);
-        // console.log(playerName);
+        //console.log(playerName);
     }
 }
