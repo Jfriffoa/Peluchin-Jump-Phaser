@@ -6,8 +6,8 @@ FBInstant.initializeAsync().then(function() {
         physics: {
             default: 'arcade',
             arcade: {
-                gravity: { y: 500 },
-                debug: true
+                gravity: { y: 1200 },
+                debug: false
             }
         },
         scene: [Preloader, MainMenu, GameScene]
