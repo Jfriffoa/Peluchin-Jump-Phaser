@@ -84,16 +84,18 @@ class MainMenu extends Phaser.Scene {
         let fbZone = this.add.image(this.cameras.main.centerX, this.cameras.main.displayHeight - (fbZoneHeight + playZoneHeight) + fbZonePadding[0], 'transparent').setOrigin(0.5, 0);
         fbZone.setDisplaySize(this.cameras.main.displayWidth * 0.8 - (fbZonePadding[1] + fbZonePadding[2]), fbZoneHeight - (fbZonePadding[0] + fbZonePadding[3]));
 
-        // Mask Profile Pic
-        let photo = this.textures.createCanvas('player-masked', 123, 129);
-        let source = this.textures.get('profile-pic').getSourceImage();
-        let sourceFrame = this.textures.getFrame('profile-pic');
-        let mask = this.textures.get('estrella').getSourceImage();
+        // Mask Profile Pic in case it didn't exists
+        if (!this.textures.exists('player-masked')){
+            let photo = this.textures.createCanvas('player-masked', 123, 129);
+            let source = this.textures.get('profile-pic').getSourceImage();
+            let sourceFrame = this.textures.getFrame('profile-pic');
+            let mask = this.textures.get('estrella').getSourceImage();
 
-        photo.draw(0, 0, mask);
-        photo.getContext().globalCompositeOperation = 'source-in';
-        photo.getContext().drawImage(source, 0, 0, sourceFrame.width, sourceFrame.height, 0, 0, 123, 129);
-        photo.refresh();
+            photo.draw(0, 0, mask);
+            photo.getContext().globalCompositeOperation = 'source-in';
+            photo.getContext().drawImage(source, 0, 0, sourceFrame.width, sourceFrame.height, 0, 0, 123, 129);
+            photo.refresh();
+        }
 
         // Add Profile Pic Masked
         let profilePic = this.add.image(fbZone.x - fbZone.displayWidth/2, fbZone.y, 'player-masked').setOrigin(0, 0);

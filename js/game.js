@@ -1,10 +1,11 @@
 class GameScene extends Phaser.Scene {
-    velocityY = -900;
-    following = false;
-    dead = false;
-
     constructor() {
         super({ key: 'Game', active: false });
+    }
+
+    init() {
+        this.jumpVelocity = -900; // Negative is up
+        this.dead = false;
     }
 
     preload() {
@@ -22,7 +23,12 @@ class GameScene extends Phaser.Scene {
         //Add Player
         this.player = this.physics.add.sprite(this.cameras.main.centerX, this.cameras.main.centerY, 'player-idle').setOrigin(0.5, 1);
         this.player.setBounce(0.2);
-        //this.player.setCollideWorldBounds(true);
+        let _x = this.player.displayWidth * 0.2;
+        let _y = this.player.displayHeight * 0.18;
+        let _w = this.player.displayWidth * 0.63;
+        let _h = this.player.displayHeight * 0.78;
+        this.player.body.setOffset(_x, _y);
+        this.player.body.setSize(_w, _h);
 
         //Add Platforms
         this.platforms = this.physics.add.staticGroup();
@@ -32,7 +38,13 @@ class GameScene extends Phaser.Scene {
             plat.setScale(plat.scaleX, plat.scaleX);
             plat.refreshBody();
 
-            // console.log(plat);
+            let _x = plat.displayWidth * 0.16;
+            let _y = plat.displayHeight * 0.19;
+            let _w = plat.displayWidth * 0.7;
+            let _h = plat.displayHeight * 0.7;
+            plat.body.setOffset(_x, _y);
+            plat.body.setSize(_w, _h);
+
             // Ajustar colisiones
             plat.body.checkCollision.top = true;
             plat.body.checkCollision.down = false;
@@ -130,16 +142,16 @@ class GameScene extends Phaser.Scene {
         this.player.setVelocityX(velocity * dx);
 
         if (dx != 0) {
-            this.player.setFlipX(dx == -1);
+            this.player.setFlipX(dx == 1);
         }
     }
 
     playerHitPlatform(player, platform){
-        if (platform.getBounds().top < player.getBounds().bottom) {
+        if (platform.body.top < player.body.bottom) {
             return;
         }
 
-        player.setVelocityY(this.velocityY);
+        player.setVelocityY(this.jumpVelocity);
     }
 
     clearClouds() {
@@ -160,8 +172,12 @@ class GameScene extends Phaser.Scene {
 
     showGameOverScreen(){
         let y = this.cameras.main.scrollY + this.cameras.main.centerY;
-        let logo = this.add.image(this.cameras.main.centerX, y, 'logo').setOrigin(0.5, 0.5);
+        let logo = new ImageButton(this, this.cameras.main.centerX, y, 'logo').setOrigin(0.5, 0.5);
         logo.setDisplaySize(this.cameras.main.displayWidth - 100, 100);
         logo.setScale(logo.scaleX);
+        this.add.existing(logo);
+
+        //logo.onPointerUp(() => { this.scene.start('MainMenu'); });
+        logo.onPointerUp(() => { this.scene.start('MainMenu'); });
     }
 }
