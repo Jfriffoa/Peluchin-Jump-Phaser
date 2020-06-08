@@ -61,7 +61,7 @@ class MainMenu extends Phaser.Scene {
         this.playButton.setScale(this.playButton.scaleY * 3, this.playButton.scaleY);
         this.add.existing(this.playButton);
 
-        this.playButton.onPressed(() => { this.scene.start('Game') });
+        this.playButton.onPointerUp(() => { this.scene.start('Game') });
         
         // Add Icon
         let icon = this.add.image(this.playButton.x - this.playButton.displayWidth/2, this.playButton.y + innerPadding[0], 'estrella').setOrigin(0, 0);
