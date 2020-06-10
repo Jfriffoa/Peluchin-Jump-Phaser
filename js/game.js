@@ -13,6 +13,7 @@ class GameScene extends Phaser.Scene {
         this.jumpVelocity = -1500; // Negative is up
         this.dead = false;
         this.score = 0;
+        this.starScore = 0;
     }
 
     preload() {
@@ -67,8 +68,13 @@ class GameScene extends Phaser.Scene {
             plat.body.checkCollision.right = false;
         }
 
+        //Add Stars
+        this.stars = this.physics.add.staticGroup();
+        this.lastStarSpawn = this.cameras.main.scrollY;
+
         // Collisions
         this.physics.add.collider(this.player, this.platforms, this.playerHitPlatform, null, this);
+        this.physics.add.overlap(this.player, this.stars, this.playerHitStar, null, this);
 
         // UI
         this.createUI();
@@ -81,10 +87,24 @@ class GameScene extends Phaser.Scene {
     // Create UI
     createUI(){
         // Add score text
-        this.scoreText = this.add.bitmapText(this.cameras.main.displayWidth * 0.05, 10, 'set-fire', "Score: " + Math.ceil(this.score));
+        this.scoreText = this.add.bitmapText(this.cameras.main.displayWidth * 0.05, 12, 'set-fire', "Score: " + Math.ceil(this.score));
         this.scoreText.setTintFill(0x000000);
         this.scoreText.setFontSize(this.cameras.main.displayHeight * 0.05);
         this.scoreText.setDepth(10);
+
+        // Add stars score
+        this.starScoreText = this.add.bitmapText(this.cameras.main.displayWidth * 0.95, 12, 'set-fire', "0000");
+        this.starScoreText.setOrigin(4, 0);
+        this.starScoreText.setTintFill(0x000000);
+        this.starScoreText.setFontSize(this.cameras.main.displayHeight * 0.05);
+        this.starScoreText.setDepth(10);
+
+        this.starScoreIcon = this.add.image(this.cameras.main.displayWidth * 0.95 - (this.starScoreText.width + 30), 10, 'estrella');
+        this.starScoreIcon.setOrigin(1, 0);
+        this.starScoreIcon.setDisplaySize(this.cameras.main.displayHeight * 0.05, this.cameras.main.displayHeight * 0.05);
+        this.starScoreIcon.setDepth(10);
+        
+        this.starScoreText.setText(this.starScore);
 
         // Add Buttons
         this.buttons = [];
@@ -96,8 +116,6 @@ class GameScene extends Phaser.Scene {
 
             this.buttons.push(btn);
             this.add.existing(btn);
-
-            //console.log(btn);
         }
 
         this.buttons[0].onPressed((time, delta) => { this.movePlayer(-1); });
@@ -105,8 +123,10 @@ class GameScene extends Phaser.Scene {
     }
 
     moveUI() {
-        // Move the Text
-        this.scoreText.y = this.cameras.main.scrollY + 10;
+        // Move the Scores
+        this.scoreText.y = this.cameras.main.scrollY + 15;
+        this.starScoreIcon.y = this.cameras.main.scrollY + 10;
+        this.starScoreText.y = this.cameras.main.scrollY + 15;
 
         // Move the buttons
         this.buttons.forEach((item, _) => { item.y = this.cameras.main.scrollY; });
@@ -124,10 +144,12 @@ class GameScene extends Phaser.Scene {
         this.updateCamera();
         this.warpPlayer();
 
-        // Check Platforms
-        this.clearClouds();
+        // Check Spawns
+        this.bottomClear();
         if (this.lastPlatformSpawn > this.cameras.main.scrollY)
             this.spawnCloud();
+        if (this.lastStarSpawn > this.cameras.main.scrollY)
+            this.spawnStar();
 
         //Check Death
         if (this.player.getBounds().top > this.cameras.main.scrollY + this.cameras.main.displayHeight)
@@ -193,7 +215,14 @@ class GameScene extends Phaser.Scene {
         }
     }
 
-    spawnCloud(){
+    playerHitStar(player, star) {
+        star.destroy();
+        player.setVelocityY(this.jumpVelocity);
+        this.starScore = this.starScore + 1;
+        this.starScoreText.setText(this.starScore);
+    }
+
+    spawnCloud() {
         let type = Phaser.Math.Between(1, 2);
         let style = Phaser.Math.Between(1, 3);
         this.lastPlatformSpawn = this.lastPlatformSpawn - Phaser.Math.Between(100, 600);
@@ -204,6 +233,7 @@ class GameScene extends Phaser.Scene {
         plat.refreshBody();
         plat.setData(this.cloudTypes.KEY, type);
 
+        // Set BBox
         let _x = plat.displayWidth * 0.16;
         let _y = plat.displayHeight * 0.19;
         let _w = plat.displayWidth * 0.7;
@@ -211,17 +241,33 @@ class GameScene extends Phaser.Scene {
         plat.body.setOffset(_x, _y);
         plat.body.setSize(_w, _h);
 
-        // Ajustar colisiones
+        // Adjust Collisions
         plat.body.checkCollision.top = true;
         plat.body.checkCollision.down = false;
         plat.body.checkCollision.left = false;
         plat.body.checkCollision.right = false;
     }
 
-    clearClouds() {
+    spawnStar() {
+        this.lastStarSpawn = this.lastStarSpawn - Phaser.Math.Between(300, 1000);
+        let x = Phaser.Math.Between(0, this.cameras.main.displayWidth * 0.95) + this.cameras.main.displayWidth * 0.05/2;
+        let star = this.stars.create(x, this.lastStarSpawn, 'estrella');
+        star.setDisplaySize(this.cameras.main.displayWidth * 0.1, 10);
+        star.setScale(star.scaleX, star.scaleX);
+        star.refreshBody();
+        star.setDepth(2);
+    }
+
+    bottomClear() {
         this.platforms.children.each((cloud) => {
             if (cloud.getBounds().top > this.cameras.main.scrollY + this.cameras.main.displayHeight + this.deltaScroll) {
                 cloud.destroy();
+            }
+        });
+
+        this.stars.children.each((star) => {
+            if (star.getBounds().top > this.cameras.main.scrollY + this.cameras.main.displayHeight + this.deltaScroll) {
+                star.destroy();
             }
         });
     }
@@ -237,6 +283,8 @@ class GameScene extends Phaser.Scene {
     showGameOverScreen(){
         // Hide Prev UI
         this.scoreText.setVisible(false);
+        this.starScoreIcon.setVisible(false);
+        this.starScoreText.setVisible(false);
 
         // Draw Game Over Screen
         let y = this.cameras.main.scrollY + this.cameras.main.centerY;
