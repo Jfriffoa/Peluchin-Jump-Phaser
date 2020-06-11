@@ -21,8 +21,9 @@ class MainMenu extends Phaser.Scene {
         //Add Logo
         let logoPadding = [30, 30, 30, 30];         // Top, Left, Right, Bottom
         this.logo = this.add.image(this.cameras.main.centerX, logoPadding[0], 'logo').setOrigin(0.5, 0);
-        this.logo.setDisplaySize(this.cameras.main.displayWidth - (logoPadding[1] + logoPadding[2]), 100);
-        this.logo.setScale(this.logo.scaleX);
+        //this.logo.setDisplaySize(this.cameras.main.displayWidth - (logoPadding[1] + logoPadding[2]), 100);
+        this.logo.setDisplaySize(100, this.cameras.main.displayHeight * 0.3 - (logoPadding[0] + logoPadding[3]));
+        this.logo.setScale(this.logo.scaleY);
 
         //Add Peluchin
         let topZoneHeight = this.logo.displayHeight + logoPadding[0] + logoPadding[3]
@@ -41,11 +42,6 @@ class MainMenu extends Phaser.Scene {
         let bottomZonePadding = [0, 10, 10, 90];    // Top, Left, Right, Bottom
         let bottomZoneSpacing = 30;
         let tempZoneHeight = bottomZoneHeight - (bottomZonePadding[0] + bottomZonePadding[3] + bottomZoneSpacing * 1);
-
-        // //Inner buttons Variables
-        // let innerPadding = [0, 0, 30, 0];          // Top, Left, Right, Bottom
-        // let innerSpacing = 10;
-        // let texts = ["Play", "Leaderboard"];
         
         ///////////////////////////////////////////////////////////////////////
         // Play Button
@@ -106,10 +102,9 @@ class MainMenu extends Phaser.Scene {
 
         // Add Facebook Name
         let playerName = this.add.bitmapText(profilePic.x + profilePic.displayWidth + fbZoneSpacing, (profilePic.y + profilePic.displayHeight / 2) * 1.005, 'set-fire', "Welcome " + this.facebook.getPlayerName());
-        let newSize = (fbZone.displayWidth - (profilePic.displayWidth + fbZoneSpacing + fbZonePadding[0] + fbZonePadding[3])) * 32 / playerName.width;
+        let newSize = (fbZone.displayWidth - (profilePic.displayWidth + fbZoneSpacing + fbZonePadding[0] + fbZonePadding[3])) * playerName.fontSize / playerName.width;
         playerName.setFontSize(Math.min(150, newSize));
         playerName.setOrigin(0, 0.5);
         playerName.setTintFill(0x000000);
-        //console.log(playerName);
     }
 }

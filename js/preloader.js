@@ -3,7 +3,6 @@ class Preloader extends Phaser.Scene {
         super('Preloader');
     }
 
-    //If I need to preload
     preload() {
         this.facebook.once('startgame', this.startGame, this);
         this.facebook.showLoadProgress(this);
@@ -20,14 +19,7 @@ class Preloader extends Phaser.Scene {
         this.load.bitmapFont('set-fire', 'assets/set-fire.png', 'assets/set-fire.fnt');
     }
 
-    //If I DON'T need to preload
-    // create() {
-    //     this.facebook.once('startgame', this.startGame, this);
-    //     this.facebook.gameStarted();
-    // }
-
     startGame(){
         this.scene.start('MainMenu');
-        // this.scene.start('Game');
     }
 }

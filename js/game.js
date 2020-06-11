@@ -9,14 +9,23 @@ class GameScene extends Phaser.Scene {
         super({ key: 'Game', active: false });
     }
 
-    init() {
+    init(data) {
         this.jumpVelocity = -1500; // Negative is up
         this.dead = false;
         this.score = 0;
         this.starScore = 0;
+
+        if (data) {
+            this.scoreLeaderboard = data.scoreLeaderboard;
+            this.starsLeaderboard = data.starsLeaderboard;
+        } else {
+            this.scoreLeaderboard = undefined;
+            this.starsLeaderboard = undefined;
+        }
     }
 
     preload() {
+        this.load.image('box', 'assets/color.jpg')
         this.load.image('player-idle', 'assets/peluchin-idle.png');
         this.load.image('player-jump', 'assets/peluchin-jumping.png');
         this.load.image('platform1', 'assets/platforms/nube1-1.png');
@@ -28,6 +37,31 @@ class GameScene extends Phaser.Scene {
     }
 
     create() {
+        // Load Leaderboards
+        if (this.scoreLeaderboard === undefined) {
+            console.log("Load Scores");
+            this.facebook.getLeaderboard('Distance');
+        }
+
+        if (this.starsLeaderboard === undefined) {
+            console.log("Load Stars");
+            this.facebook.getLeaderboard('Stars');
+        }
+
+        this.facebook.on('getleaderboard', (leaderboard) => {
+            switch(leaderboard.name){
+                case 'Distance':
+                    this.scoreLeaderboard = leaderboard;
+                    this.scoreLeaderboard.getPlayerScore();
+                    break;
+                case 'Stars':
+                    this.starsLeaderboard = leaderboard;
+                    this.starsLeaderboard.getPlayerScore();
+                    break;
+            }
+            console.log("Leaderboard Loaded: " + leaderboard.name);
+        });
+
         //Add Background
         this.background = this.add.image(0, 0, 'menubg');
         this.background.setDisplaySize(this.cameras.main.displayWidth, this.cameras.main.displayHeight);
@@ -227,7 +261,7 @@ class GameScene extends Phaser.Scene {
         let style = Phaser.Math.Between(1, 3);
         this.lastPlatformSpawn = this.lastPlatformSpawn - Phaser.Math.Between(100, 600);
         let platX = Phaser.Math.Between(0, this.cameras.main.displayWidth * 0.67) + this.cameras.main.displayWidth * 0.33/2;
-        let plat = this.platforms.create(platX, this.lastPlatformSpawn, 'platform' + (type * style));
+        let plat = this.platforms.create(platX, this.lastPlatformSpawn, 'platform' + ((type - 1) * 3 + style));
         plat.setDisplaySize(this.cameras.main.displayWidth * 0.3, 100);
         plat.setScale(plat.scaleX, plat.scaleX);
         plat.refreshBody();
@@ -275,25 +309,109 @@ class GameScene extends Phaser.Scene {
     gameOver() {
         this.dead = true;
         console.log("GAME OVER");
-
         this.player.disableBody(true, true);
+
+        // Save Scores
+        this.newHighScore = (this.starsLeaderboard.playerScore < this.starScore || this.scoreLeaderboard.playerScore < this.score);
+        this.starsLeaderboard.setScore(this.starScore);
+        this.scoreLeaderboard.setScore(Math.ceil(this.score));
+
+        // Show UI
         this.showGameOverScreen();
     }
 
     showGameOverScreen(){
+        ///////////////////////////////////////////////////////////////////////
         // Hide Prev UI
         this.scoreText.setVisible(false);
         this.starScoreIcon.setVisible(false);
         this.starScoreText.setVisible(false);
 
+        ///////////////////////////////////////////////////////////////////////
         // Draw Game Over Screen
-        let y = this.cameras.main.scrollY + this.cameras.main.centerY;
-        let logo = new ImageButton(this, this.cameras.main.centerX, y, 'logo').setOrigin(0.5, 0.5);
-        logo.setDisplaySize(this.cameras.main.displayWidth - 100, 100);
-        logo.setScale(logo.scaleX);
-        this.add.existing(logo);
+        let screenRect = new Phaser.Geom.Rectangle(this.cameras.main.x, this.cameras.main.scrollY, this.cameras.main.displayWidth, this.cameras.main.displayHeight);
+        let bg = this.add.image(screenRect.x, screenRect.y, 'box');
+        bg.setDisplaySize(screenRect.width * 2, screenRect.height * 2);
+        bg.setTintFill(0x000000);
+        bg.setAlpha(0.5);
+        bg.setDepth(5);
 
-        //logo.onPointerUp(() => { this.scene.start('MainMenu'); });
-        logo.onPointerUp(() => { this.scene.start('MainMenu'); });
+        ///////////////////////////////////////////////////////////////////////
+        // Top Zone
+        let topZoneHeight = screenRect.height * 0.3;
+        let topZonePadding = [30, 0, 0, 0];          // Top, Left, Right, Bottom
+        
+        // Add Text
+        let topText = this.add.bitmapText(screenRect.centerX, screenRect.y + topZonePadding[0], 'set-fire', (this.newHighScore) ? 'NEW\nHIGHSCORE' : 'GAME\nOVER');
+        topText.setCenterAlign();
+        topText.setTintFill(0xffffff);
+        topText.setFontSize((topZoneHeight - (topZonePadding[0] + topZonePadding[3]))/2);
+        topText.setX((screenRect.width - topText.width - topZonePadding[1] - topZonePadding[2]) / 2 + topZonePadding[1]);
+        topText.setDepth(10);
+        
+        // Add Shadow
+        let topTextShadow = this.add.bitmapText(screenRect.centerX, screenRect.y + topZonePadding[0], 'set-fire', (this.newHighScore) ? 'NEW\nHIGHSCORE' : 'GAME\nOVER');
+        topTextShadow.setCenterAlign();
+        topTextShadow.setTintFill(0x000000);
+        topTextShadow.setFontSize((topZoneHeight - (topZonePadding[0] + topZonePadding[3]))/2 + 5);
+        topTextShadow.setX((screenRect.width - topTextShadow.width - topZonePadding[1] - topZonePadding[2]) / 2 + 5 + topZonePadding[1]);
+        topTextShadow.setDepth(9);
+        
+        ///////////////////////////////////////////////////////////////////////
+        // Middle Zone
+        let midZoneHeight = screenRect.height * 0.18;
+        let midZonePadding = [0, 0, 0, 0];          // Top, Left, Right, Bottom
+        let midZoneSpacing = [40, 20];              // X, Y
+        let midZoneRect = new Phaser.Geom.Rectangle(screenRect.x, screenRect.centerY - mindZoneHeight/2, screenRect.width, midZoneHeight);
+
+        // Add Score Text
+        //let endScoreText = this.add
+
+        ///////////////////////////////////////////////////////////////////////
+        // Bottom Zone
+        let botZoneHeight = screenRect.height * 0.2;
+        let botZonePadding = [0, 0, 0, 60];         // Top, Left, Right, Bottom
+        let botZoneSpacing = [40, 20];              // X, Y
+
+        // Add Buttons
+        let buttons = [];
+        let buttonsText = ["Play Again", "Main Menu"];
+        let buttonsWidth = screenRect.width * 0.6;
+        let buttonsHeight = botZoneHeight - (botZonePadding[0] + botZonePadding[3] + botZoneSpacing[1] * 1);
+        for (let i = 0; i < 2; i++){
+            let y = (screenRect.bottom - botZoneHeight) + botZonePadding[0] + botZoneSpacing[1] * i + buttonsHeight * i / 2;
+            let btn = new ImageButton(this, 0, y, 'transparent');
+            btn.setDisplaySize(100, buttonsHeight/2);
+            btn.setScale(btn.scaleY * 4, btn.scaleY);
+            btn.setX((screenRect.width - btn.displayWidth - botZonePadding[1] - botZonePadding[2]) / 2 + botZonePadding[1]);
+            btn.setOrigin(0, 0);
+            btn.setDepth(10);
+            buttons.push(btn);
+            this.add.existing(btn);
+
+            // Add Icon
+            let icon = this.add.image(btn.x, btn.y, 'estrella');
+            icon.setOrigin(0, 0);
+            icon.setDisplaySize(btn.displayHeight, btn.displayHeight);
+            icon.setDepth(11);
+
+            // Add Text
+            let x = icon.x + icon.displayWidth + botZoneSpacing[0];
+            y = icon.y + icon.displayHeight / 2;
+            let text = this.add.bitmapText(x, y, 'set-fire', buttonsText[i]);
+            text.setFontSize(icon.displayHeight * 0.8);
+            text.setOrigin(0, 0.5);
+            text.setTintFill(0xffffff);
+            text.setDepth(11);
+        }
+
+        // Set Behaviour
+        buttons[0].onPointerUp(() => {
+            this.scene.start('Game', {
+                'scoreLeaderboard': this.scoreLeaderboard,
+                'starsLeaderboard': this.starsLeaderboard
+            });
+        });
+        buttons[1].onPointerUp(() => { this.scene.start('MainMenu'); });
     }
 }
