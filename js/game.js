@@ -4,6 +4,14 @@ class GameScene extends Phaser.Scene {
         NORMAL: 1,
         BAD: 2
     }
+
+    difficult = {   // Represented by max "height", or the maximum score
+        VERY_EASY: 100,
+        EASY: 250,
+        NORMAL: 450,
+        HARD: 700,
+        VERY_HARD: 100000
+    }
     
     constructor() {
         super({ key: 'Game', active: false });
@@ -14,6 +22,7 @@ class GameScene extends Phaser.Scene {
         this.dead = false;
         this.score = 0;
         this.starScore = 0;
+        this.actualDifficult = this.difficult.VERY_EASY;
 
         if (data) {
             this.scoreLeaderboard = data.scoreLeaderboard;
@@ -70,6 +79,9 @@ class GameScene extends Phaser.Scene {
         //Add Player
         this.player = this.physics.add.sprite(this.cameras.main.centerX, this.cameras.main.centerY, 'player-idle').setOrigin(0.5, 1);
         this.player.setBounce(0.2);
+        this.player.setDisplaySize(this.cameras.main.width * 0.16, 100);
+        this.player.setScale(this.player.scaleX, this.player.scaleX);
+
         let _x = this.player.displayWidth * 0.2;
         let _y = this.player.displayHeight * 0.18;
         let _w = this.player.displayWidth * 0.63;
@@ -128,9 +140,10 @@ class GameScene extends Phaser.Scene {
 
         // Add stars score
         this.starScoreText = this.add.bitmapText(this.cameras.main.displayWidth * 0.95, 12, 'set-fire', "0000");
-        this.starScoreText.setOrigin(4, 0);
+        this.starScoreText.setOrigin(0, 0);
         this.starScoreText.setTintFill(0x000000);
         this.starScoreText.setFontSize(this.cameras.main.displayHeight * 0.05);
+        this.starScoreText.setX(this.starScoreText.x - this.starScoreText.width);
         this.starScoreText.setDepth(10);
 
         this.starScoreIcon = this.add.image(this.cameras.main.displayWidth * 0.95 - (this.starScoreText.width + 30), 10, 'estrella');
@@ -185,10 +198,27 @@ class GameScene extends Phaser.Scene {
         if (this.lastStarSpawn > this.cameras.main.scrollY)
             this.spawnStar();
 
-        //Check Death
+        // Check Death
         if (this.player.getBounds().top > this.cameras.main.scrollY + this.cameras.main.displayHeight)
             this.gameOver();
 
+        // Check Difficult
+        if(this.score > this.actualDifficult){
+            switch(this.actualDifficult) {
+                case this.difficult.VERY_EASY:
+                    this.actualDifficult = this.difficult.EASY;
+                    break;
+                case this.difficult.EASY:
+                    this.actualDifficult = this.difficult.NORMAL;
+                    break;
+                case this.difficult.NORMAL:
+                    this.actualDifficult = this.difficult.HARD;
+                    break;
+                case this.difficult.HARD:
+                    this.actualDifficult = this.difficult.VERY_HARD;
+                    break;
+            }
+        }
     }
 
     updateCamera(){
@@ -257,9 +287,33 @@ class GameScene extends Phaser.Scene {
     }
 
     spawnCloud() {
-        let type = Phaser.Math.Between(1, 2);
+        let type = this.cloudTypes.NORMAL;
+        let dist = 100;
+        switch (this.actualDifficult){
+            case this.difficult.VERY_EASY:
+                type = this.cloudTypes.NORMAL;
+                dist = Phaser.Math.Between(250, 500);
+                break;
+            case this.difficult.EASY:
+                type = (Phaser.Math.Between(1, 100) > 25) ? this.cloudTypes.NORMAL : this.cloudTypes.BAD;
+                dist = Phaser.Math.Between(400, 600);
+                break;
+            case this.difficult.NORMAL:
+                type = (Phaser.Math.Between(1, 100) > 50) ? this.cloudTypes.NORMAL : this.cloudTypes.BAD;
+                dist = Phaser.Math.Between(500, 700);
+                break;
+            case this.difficult.HARD:
+                type = (Phaser.Math.Between(1, 100) > 75) ? this.cloudTypes.NORMAL : this.cloudTypes.BAD;
+                dist = Phaser.Math.Between(600, 800);
+                break;
+            case this.difficult.VERY_HARD:
+                type = this.cloudTypes.BAD;
+                dist = Phaser.Math.Between(800, 900);
+                break;
+            
+        }
         let style = Phaser.Math.Between(1, 3);
-        this.lastPlatformSpawn = this.lastPlatformSpawn - Phaser.Math.Between(100, 600);
+        this.lastPlatformSpawn = this.lastPlatformSpawn - dist;
         let platX = Phaser.Math.Between(0, this.cameras.main.displayWidth * 0.67) + this.cameras.main.displayWidth * 0.33/2;
         let plat = this.platforms.create(platX, this.lastPlatformSpawn, 'platform' + ((type - 1) * 3 + style));
         plat.setDisplaySize(this.cameras.main.displayWidth * 0.3, 100);
@@ -283,7 +337,26 @@ class GameScene extends Phaser.Scene {
     }
 
     spawnStar() {
-        this.lastStarSpawn = this.lastStarSpawn - Phaser.Math.Between(300, 1000);
+        let dist = 100;
+        switch(this.actualDifficult){
+            case this.difficult.VERY_EASY:
+                dist = Phaser.Math.Between(300, 700);
+                break;
+            case this.difficult.EASY:
+                dist = Phaser.Math.Between(500, 1000);
+                break;
+            case this.difficult.NORMAL:
+                dist = Phaser.Math.Between(700, 1500);
+                break;
+            case this.difficult.HARD:
+                dist = Phaser.Math.Between(1000, 2000);
+                break;
+            case this.difficult.VERY_HARD:
+                dist = Phaser.Math.Between(1500, 3000);
+                break;
+        }
+
+        this.lastStarSpawn = this.lastStarSpawn - dist;
         let x = Phaser.Math.Between(0, this.cameras.main.displayWidth * 0.95) + this.cameras.main.displayWidth * 0.05/2;
         let star = this.stars.create(x, this.lastStarSpawn, 'estrella');
         star.setDisplaySize(this.cameras.main.displayWidth * 0.1, 10);
