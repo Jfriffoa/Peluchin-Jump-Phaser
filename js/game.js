@@ -359,18 +359,44 @@ class GameScene extends Phaser.Scene {
         
         ///////////////////////////////////////////////////////////////////////
         // Middle Zone
-        let midZoneHeight = screenRect.height * 0.18;
+        let midZoneHeight = screenRect.height * 0.13;
         let midZonePadding = [0, 0, 0, 0];          // Top, Left, Right, Bottom
-        let midZoneSpacing = [40, 20];              // X, Y
-        let midZoneRect = new Phaser.Geom.Rectangle(screenRect.x, screenRect.centerY - mindZoneHeight/2, screenRect.width, midZoneHeight);
+        let midZoneSpacing = 0;
+        let midZoneRect = new Phaser.Geom.Rectangle(screenRect.x, screenRect.centerY - midZoneHeight/2, screenRect.width, midZoneHeight);
+        // let r = this.add.image(midZoneRect.x, midZoneRect.y, null);
+        // r.setOrigin(0, 0);
+        // r.setDisplaySize(midZoneRect.width, midZoneRect.height);
 
         // Add Score Text
-        //let endScoreText = this.add
+        let endScoreText = this.add.bitmapText(midZoneRect.centerX, midZoneRect.y + midZonePadding[0], 'set-fire', 'Score: 999999');
+        endScoreText.setOrigin(0, 0);
+        endScoreText.setTintFill(0xffffff);
+        endScoreText.setFontSize((midZoneRect.height - (midZoneSpacing + midZonePadding[0] + midZonePadding[3]))/2);
+        endScoreText.setX((midZoneRect.width - endScoreText.width - midZonePadding[1] - midZonePadding[2]) / 2 + midZonePadding[1]);
+        endScoreText.setDepth(10);
+        endScoreText.setText("Score: " + Math.ceil(this.score));
+        // endScoreText.setText("Score");
+        // console.log(endScoreText);
+
+        // Add Icon
+        let starsIcon = this.add.image(midZoneRect.centerX / 2, midZoneRect.bottom + midZonePadding[3], 'estrella');
+        let iconSize = (midZoneRect.height - midZoneSpacing - midZonePadding[3] - midZonePadding[3]) / 2;
+        starsIcon.setOrigin(0, 1);
+        starsIcon.setDisplaySize(iconSize, iconSize);
+        starsIcon.setDepth(10);
+
+        // Add Star Score
+        let endStarScoreText = this.add.bitmapText(midZoneRect.centerX - midZoneRect.width * 0.075, starsIcon.y - starsIcon.displayHeight, 'set-fire', ': 999');
+        endStarScoreText.setOrigin(0, 0);
+        endStarScoreText.setTintFill(0xffffff);
+        endStarScoreText.setFontSize((midZoneRect.height - midZoneSpacing - midZonePadding[0] - midZonePadding[3]) / 2);
+        endStarScoreText.setDepth(10);
+        endStarScoreText.setText(": " + this.starScore);
 
         ///////////////////////////////////////////////////////////////////////
         // Bottom Zone
         let botZoneHeight = screenRect.height * 0.2;
-        let botZonePadding = [0, 0, 0, 60];         // Top, Left, Right, Bottom
+        let botZonePadding = [0, 0, 0, 90];         // Top, Left, Right, Bottom
         let botZoneSpacing = [40, 20];              // X, Y
 
         // Add Buttons
