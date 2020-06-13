@@ -38,11 +38,23 @@ class GameScene extends Phaser.Scene {
         this.load.image('player-idle', 'assets/peluchin-idle.png');
         this.load.image('player-jump', 'assets/peluchin-jumping.png');
         this.load.image('platform1', 'assets/platforms/nube1-1.png');
+        this.load.image('platform1-2', 'assets/platforms/nube1-2.png');
+        this.load.image('platform1-3', 'assets/platforms/nube1-3.png');
         this.load.image('platform2', 'assets/platforms/nube2-1.png');
+        this.load.image('platform2-2', 'assets/platforms/nube2-2.png');
+        this.load.image('platform2-3', 'assets/platforms/nube2-3.png');
         this.load.image('platform3', 'assets/platforms/nube3-1.png');
+        this.load.image('platform3-2', 'assets/platforms/nube3-2.png');
+        this.load.image('platform3-3', 'assets/platforms/nube3-3.png');
         this.load.image('platform4', 'assets/platforms/nube-mala1-1.png');
+        this.load.image('platform4-2', 'assets/platforms/nube-mala1-2.png');
+        this.load.image('platform4-3', 'assets/platforms/nube-mala1-3.png');
         this.load.image('platform5', 'assets/platforms/nube-mala2-1.png');
+        this.load.image('platform5-2', 'assets/platforms/nube-mala2-2.png');
+        this.load.image('platform5-3', 'assets/platforms/nube-mala2-3.png');
         this.load.image('platform6', 'assets/platforms/nube-mala3-1.png');
+        this.load.image('platform6-2', 'assets/platforms/nube-mala3-2.png');
+        this.load.image('platform6-3', 'assets/platforms/nube-mala3-3.png');
     }
 
     create() {
@@ -76,18 +88,38 @@ class GameScene extends Phaser.Scene {
         this.background.setDisplaySize(this.cameras.main.displayWidth, this.cameras.main.displayHeight);
         this.background.setScale(2 * this.background.scaleX, 2 * this.background.scaleY);
 
-        //Add Player
+        // Add Player
         this.player = this.physics.add.sprite(this.cameras.main.centerX, this.cameras.main.centerY, 'player-idle').setOrigin(0.5, 1);
         this.player.setBounce(0.2);
         this.player.setDisplaySize(this.cameras.main.width * 0.16, 100);
         this.player.setScale(this.player.scaleX, this.player.scaleX);
 
+        // Set Bounding Box
         let _x = this.player.displayWidth * 0.2;
         let _y = this.player.displayHeight * 0.18;
         let _w = this.player.displayWidth * 0.63;
         let _h = this.player.displayHeight * 0.78;
         this.player.body.setOffset(_x, _y);
         this.player.body.setSize(_w, _h);
+
+        // Animate Player
+        this.anims.create({
+            key: 'jump',
+            frames: [{ key: 'player-idle' }],
+            duration: 100
+        });
+
+        this.player.on('animationcomplete', function(anim, frame, sprite){
+            sprite.anims.play('on-air');
+        });
+
+        this.anims.create({
+            key: 'on-air',
+            frames: [{ key: 'player-jump' }],
+            frameRate: 10,
+            repeat: -1
+        });
+        this.player.anims.play('on-air');
 
         //Add Platforms
         this.platforms = this.physics.add.staticGroup();
@@ -113,6 +145,21 @@ class GameScene extends Phaser.Scene {
             plat.body.checkCollision.left = false;
             plat.body.checkCollision.right = false;
         }
+
+        // Anim Platforms
+        for (let i = 1; i < 7; i++){
+            this.anims.create({
+                key: 'nube' + i,
+                frames: [
+                    { key: 'platform' + i },
+                    { key: 'platform' + i  + '-2'},
+                    { key: 'platform' + i  + '-3'}
+                ],
+                frameRate: 5,
+                repeat: -1
+            })
+        }
+
 
         //Add Stars
         this.stars = this.physics.add.staticGroup();
@@ -273,6 +320,7 @@ class GameScene extends Phaser.Scene {
         }
 
         player.setVelocityY(this.jumpVelocity);
+        player.anims.play('jump');
 
         if (platform.getData(this.cloudTypes.KEY) == this.cloudTypes.BAD) {
             platform.destroy();
@@ -320,6 +368,8 @@ class GameScene extends Phaser.Scene {
         plat.setScale(plat.scaleX, plat.scaleX);
         plat.refreshBody();
         plat.setData(this.cloudTypes.KEY, type);
+        plat.anims.setDelay(Phaser.Math.Between(0, 200));
+        plat.anims.play('nube' + ((type - 1) * 3 + style));
 
         // Set BBox
         let _x = plat.displayWidth * 0.16;
@@ -409,6 +459,12 @@ class GameScene extends Phaser.Scene {
         bg.setAlpha(0.5);
         bg.setDepth(5);
 
+        // let logo = this.add.image(screenRect.centerX, screenRect.centerY, 'logo');
+        // logo.setOrigin(0.5, 0.5);
+        // logo.setDisplaySize(screenRect.width * 0.7, 100);
+        // logo.setScale(logo.scaleX, logo.scaleX);
+        // logo.setDepth(4);
+
         ///////////////////////////////////////////////////////////////////////
         // Top Zone
         let topZoneHeight = screenRect.height * 0.3;
@@ -423,11 +479,10 @@ class GameScene extends Phaser.Scene {
         topText.setDepth(10);
         
         // Add Shadow
-        let topTextShadow = this.add.bitmapText(screenRect.centerX, screenRect.y + topZonePadding[0], 'set-fire', (this.newHighScore) ? 'NEW\nHIGHSCORE' : 'GAME\nOVER');
+        let topTextShadow = this.add.bitmapText(topText.x + 0.02 * topText.width, topText.y + 0.02 * topText.height, 'set-fire', (this.newHighScore) ? 'NEW\nHIGHSCORE' : 'GAME\nOVER');
         topTextShadow.setCenterAlign();
         topTextShadow.setTintFill(0x000000);
-        topTextShadow.setFontSize((topZoneHeight - (topZonePadding[0] + topZonePadding[3]))/2 + 5);
-        topTextShadow.setX((screenRect.width - topTextShadow.width - topZonePadding[1] - topZonePadding[2]) / 2 + 5 + topZonePadding[1]);
+        topTextShadow.setFontSize(topText.fontSize);
         topTextShadow.setDepth(9);
         
         ///////////////////////////////////////////////////////////////////////
@@ -448,8 +503,6 @@ class GameScene extends Phaser.Scene {
         endScoreText.setX((midZoneRect.width - endScoreText.width - midZonePadding[1] - midZonePadding[2]) / 2 + midZonePadding[1]);
         endScoreText.setDepth(10);
         endScoreText.setText("Score: " + Math.ceil(this.score));
-        // endScoreText.setText("Score");
-        // console.log(endScoreText);
 
         // Add Icon
         let starsIcon = this.add.image(midZoneRect.centerX / 2, midZoneRect.bottom + midZonePadding[3], 'estrella');
