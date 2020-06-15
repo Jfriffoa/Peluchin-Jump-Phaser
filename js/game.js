@@ -1,3 +1,7 @@
+///////////////////////////////////////////////////////////////////////
+//
+//
+///////////////////////////////////////////////////////////////////////
 class GameScene extends Phaser.Scene {
     cloudTypes = {
         KEY: "type",
@@ -18,7 +22,7 @@ class GameScene extends Phaser.Scene {
     }
 
     init(data) {
-        this.jumpVelocity = -1500; // Negative is up
+        this.jumpVelocity = this.physics.world.gravity.y * -1.25; // Negative is up - Old was 1500
         this.dead = false;
         this.score = 0;
         this.starScore = 0;
@@ -86,10 +90,10 @@ class GameScene extends Phaser.Scene {
         //Add Background
         this.background = this.add.image(0, 0, 'menubg');
         this.background.setDisplaySize(this.cameras.main.displayWidth, this.cameras.main.displayHeight);
-        this.background.setScale(2 * this.background.scaleX, 2 * this.background.scaleY);
+        this.background.setScale(this.background.scaleX, this.background.scaleY);
 
         // Add Player
-        this.player = this.physics.add.sprite(this.cameras.main.centerX, this.cameras.main.centerY, 'player-idle').setOrigin(0.5, 1);
+        this.player = this.physics.add.sprite(this.cameras.main.centerX, this.cameras.main.displayHeight * 0.7, 'player-idle');
         this.player.setBounce(0.2);
         this.player.setDisplaySize(this.cameras.main.width * 0.16, 100);
         this.player.setScale(this.player.scaleX, this.player.scaleX);
@@ -121,14 +125,17 @@ class GameScene extends Phaser.Scene {
         });
         this.player.anims.play('on-air');
 
-        //Add Platforms
+        //Add Floor of Platforms
         this.platforms = this.physics.add.staticGroup();
         for (let i = 0; i < 3; i++){
             let style = Phaser.Math.Between(1, 3);
-            this.lastPlatformSpawn = this.cameras.main.displayHeight - 500 * (i + 1);
-            let plat = this.platforms.create(this.cameras.main.centerX, this.lastPlatformSpawn, 'platform' + style);
+            let platX = this.cameras.main.displayWidth * 0.3 * i + this.cameras.main.displayWidth * 0.3/2;
+            this.lastPlatformSpawn = this.cameras.main.displayHeight;
+
+            let plat = this.platforms.create(platX, this.lastPlatformSpawn, 'platform' + style);
             plat.setDisplaySize(this.cameras.main.displayWidth * 0.3, 100);
             plat.setScale(plat.scaleX, plat.scaleX);
+            plat.setY(plat.y - plat.displayHeight);
             plat.refreshBody();
             plat.setData(this.cloudTypes.KEY, this.cloudTypes.NORMAL);
 
@@ -279,8 +286,9 @@ class GameScene extends Phaser.Scene {
             // Update Score
             this.score = this.score + (this.lastUpScroll - this.cameras.main.scrollY) / 10000;
             this.scoreText.setText("Score: " + Math.ceil(this.score));
-        } else if (this.player.y > this.cameras.main.centerY) { // Going Down
-            let downScroll = Math.abs(this.lastUpScroll - this.player.y);
+        } else if (this.player.y > this.cameras.main.scrollY + this.cameras.main.centerY) { // Going Down
+            let downScroll = Math.abs(this.player.y - this.lastUpScroll);
+            console.log("Down: " + downScroll + " | Y: " + this.player.y + " | LU: " + this.lastUpScroll + "| Ds: " + this.deltaScroll);
             if (downScroll < this.deltaScroll) {
                 // Move the Camera
                 this.cameras.main.scrollY = this.player.y - this.cameras.main.displayHeight/2;
@@ -336,30 +344,33 @@ class GameScene extends Phaser.Scene {
 
     spawnCloud() {
         let type = this.cloudTypes.NORMAL;
-        let dist = 100;
+        let dist = 1000;                     // This is 000.0% relative to the jump speed
         switch (this.actualDifficult){
             case this.difficult.VERY_EASY:
                 type = this.cloudTypes.NORMAL;
-                dist = Phaser.Math.Between(250, 500);
+                dist = Phaser.Math.Between(167, 333);
                 break;
             case this.difficult.EASY:
                 type = (Phaser.Math.Between(1, 100) > 25) ? this.cloudTypes.NORMAL : this.cloudTypes.BAD;
-                dist = Phaser.Math.Between(400, 600);
+                dist = Phaser.Math.Between(267, 400);
                 break;
             case this.difficult.NORMAL:
                 type = (Phaser.Math.Between(1, 100) > 50) ? this.cloudTypes.NORMAL : this.cloudTypes.BAD;
-                dist = Phaser.Math.Between(500, 700);
+                dist = Phaser.Math.Between(333, 467);
                 break;
             case this.difficult.HARD:
                 type = (Phaser.Math.Between(1, 100) > 75) ? this.cloudTypes.NORMAL : this.cloudTypes.BAD;
-                dist = Phaser.Math.Between(600, 800);
+                dist = Phaser.Math.Between(400, 533);
                 break;
             case this.difficult.VERY_HARD:
                 type = this.cloudTypes.BAD;
-                dist = Phaser.Math.Between(800, 900);
+                dist = Phaser.Math.Between(533, 600);
                 break;
             
         }
+
+        dist = dist / 1000.0 * -1 * this.jumpVelocity; // Fix to make it proportional no matter the screen
+
         let style = Phaser.Math.Between(1, 3);
         this.lastPlatformSpawn = this.lastPlatformSpawn - dist;
         let platX = Phaser.Math.Between(0, this.cameras.main.displayWidth * 0.67) + this.cameras.main.displayWidth * 0.33/2;
@@ -387,24 +398,26 @@ class GameScene extends Phaser.Scene {
     }
 
     spawnStar() {
-        let dist = 100;
+        let dist = 1000;    // 000.0% Relative to the jump speed
         switch(this.actualDifficult){
             case this.difficult.VERY_EASY:
-                dist = Phaser.Math.Between(300, 700);
+                dist = Phaser.Math.Between(200, 467);
                 break;
             case this.difficult.EASY:
-                dist = Phaser.Math.Between(500, 1000);
+                dist = Phaser.Math.Between(333, 667);
                 break;
             case this.difficult.NORMAL:
-                dist = Phaser.Math.Between(700, 1500);
+                dist = Phaser.Math.Between(467, 1000);
                 break;
             case this.difficult.HARD:
-                dist = Phaser.Math.Between(1000, 2000);
+                dist = Phaser.Math.Between(667, 1333);
                 break;
             case this.difficult.VERY_HARD:
-                dist = Phaser.Math.Between(1500, 3000);
+                dist = Phaser.Math.Between(1000, 2000);
                 break;
         }
+
+        dist = dist / 1000.0 * -1 * this.jumpVelocity // Factor to make it relative
 
         this.lastStarSpawn = this.lastStarSpawn - dist;
         let x = Phaser.Math.Between(0, this.cameras.main.displayWidth * 0.95) + this.cameras.main.displayWidth * 0.05/2;
@@ -522,14 +535,14 @@ class GameScene extends Phaser.Scene {
         ///////////////////////////////////////////////////////////////////////
         // Bottom Zone
         let botZoneHeight = screenRect.height * 0.2;
-        let botZonePadding = [0, 0, 0, 90];         // Top, Left, Right, Bottom
+        let botZonePadding = [0, 0, 0, 10];         // Top, Left, Right, Bottom
         let botZoneSpacing = [40, 20];              // X, Y
 
         // Add Buttons
         let buttons = [];
         let buttonsText = ["Play Again", "Main Menu"];
         let buttonsWidth = screenRect.width * 0.6;
-        let buttonsHeight = botZoneHeight - (botZonePadding[0] + botZonePadding[3] + botZoneSpacing[1] * 1);
+        let buttonsHeight = botZoneHeight - (botZonePadding[0] + botZoneHeight * 0.1 + botZoneSpacing[1] * 1);
         for (let i = 0; i < 2; i++){
             let y = (screenRect.bottom - botZoneHeight) + botZonePadding[0] + botZoneSpacing[1] * i + buttonsHeight * i / 2;
             let btn = new ImageButton(this, 0, y, 'transparent');

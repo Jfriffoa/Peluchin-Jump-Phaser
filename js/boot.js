@@ -6,7 +6,7 @@ FBInstant.initializeAsync().then(function() {
         physics: {
             default: 'arcade',
             arcade: {
-                gravity: { y: 1200 },
+                gravity: { y: window.innerHeight / 2 },
                 debug: false
             }
         },

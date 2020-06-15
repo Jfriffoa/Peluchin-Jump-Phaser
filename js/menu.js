@@ -8,10 +8,18 @@ class MainMenu extends Phaser.Scene {
     }
 
     create() {
+        // Debug Text
+        let debugText = this.add.bitmapText(16, 16, 'set-fire', 'W: ' + this.cameras.main.displayWidth + ' H: ' + this.cameras.main.displayHeight)
+            .setOrigin(0, 0)
+            .setTintFill(0x000000)
+            .setDepth(15);
+        debugText.setFontSize((this.cameras.main.displayWidth - 32) * debugText.fontSize / debugText.width);
+
+
         //Add Bg
         this.background = this.add.image(0, 0, 'menubg');
         this.background.setDisplaySize(this.cameras.main.displayWidth, this.cameras.main.displayHeight);
-        this.background.setScale(2 * this.background.scaleX, 2 * this.background.scaleY);
+        this.background.setScale(this.background.scaleX, this.background.scaleY);
 
         //Add Bottom Cloud
         this.cloud = this.add.image(0, this.cameras.main.displayHeight, 'nubes').setOrigin(0, 1);
@@ -46,14 +54,14 @@ class MainMenu extends Phaser.Scene {
         ///////////////////////////////////////////////////////////////////////
         // Play Button
         let playZoneHeight = this.cameras.main.displayHeight * 0.12;
-        let playZonePadding = [0, 10, 10, 90];
+        let playZonePadding = [0, 10, 10, 10];
         let innerPadding = [0, 0, 0, 0]
         let innerSpacing = 30;
 
         // Add Button
         this.playButton = new ImageButton(this, this.cameras.main.centerX * 1.05, this.cameras.main.displayHeight - playZoneHeight + playZonePadding[0], 'transparent');
         this.playButton.setOrigin(0.5, 0);
-        this.playButton.setDisplaySize(100, playZoneHeight - (playZonePadding[0] + playZonePadding[3]));
+        this.playButton.setDisplaySize(100, playZoneHeight - (playZonePadding[0] + playZoneHeight * 0.2));
         this.playButton.setScale(this.playButton.scaleY * 3, this.playButton.scaleY);
         this.add.existing(this.playButton);
 
@@ -74,11 +82,11 @@ class MainMenu extends Phaser.Scene {
         // Facebook
         let fbZoneHeight = this.cameras.main.displayHeight * 0.10;
         let fbZonePadding = [0, 0, 0, 10];
-        let fbZoneSpacing = 30;
+        let fbZoneSpacing = 20;
 
         // Define zone
         let fbZone = this.add.image(this.cameras.main.centerX, this.cameras.main.displayHeight - (fbZoneHeight + playZoneHeight) + fbZonePadding[0], 'transparent').setOrigin(0.5, 0);
-        fbZone.setDisplaySize(this.cameras.main.displayWidth * 0.8 - (fbZonePadding[1] + fbZonePadding[2]), fbZoneHeight - (fbZonePadding[0] + fbZonePadding[3]));
+        fbZone.setDisplaySize(this.cameras.main.displayWidth * 0.9 - (fbZonePadding[1] + fbZonePadding[2]), fbZoneHeight - (fbZonePadding[0] + fbZonePadding[3]));
 
         // Mask Profile Pic in case it didn't exists
         if (!this.textures.exists('player-masked')){
