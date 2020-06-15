@@ -9,17 +9,18 @@ class MainMenu extends Phaser.Scene {
 
     create() {
         // Debug Text
-        let debugText = this.add.bitmapText(16, 16, 'set-fire', 'W: ' + this.cameras.main.displayWidth + ' H: ' + this.cameras.main.displayHeight)
-            .setOrigin(0, 0)
-            .setTintFill(0x000000)
-            .setDepth(15);
-        debugText.setFontSize((this.cameras.main.displayWidth - 32) * debugText.fontSize / debugText.width);
+        // let debugText = this.add.bitmapText(16, 16, 'set-fire', 'W: ' + this.cameras.main.displayWidth + ' H: ' + this.cameras.main.displayHeight)
+        //     .setOrigin(0, 0)
+        //     .setTintFill(0x000000)
+        //     .setDepth(15);
+        // debugText.setFontSize((this.cameras.main.displayWidth - 32) * debugText.fontSize / debugText.width);
 
 
         //Add Bg
         this.background = this.add.image(0, 0, 'menubg');
+        this.background.setOrigin(0, 0);
         this.background.setDisplaySize(this.cameras.main.displayWidth, this.cameras.main.displayHeight);
-        this.background.setScale(this.background.scaleX, this.background.scaleY);
+        //this.background.setScale(this.background.scaleX, this.background.scaleY);
 
         //Add Bottom Cloud
         this.cloud = this.add.image(0, this.cameras.main.displayHeight, 'nubes').setOrigin(0, 1);

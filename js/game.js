@@ -64,12 +64,12 @@ class GameScene extends Phaser.Scene {
     create() {
         // Load Leaderboards
         if (this.scoreLeaderboard === undefined) {
-            console.log("Load Scores");
+            //console.log("Load Scores");
             this.facebook.getLeaderboard('Distance');
         }
 
         if (this.starsLeaderboard === undefined) {
-            console.log("Load Stars");
+            //console.log("Load Stars");
             this.facebook.getLeaderboard('Stars');
         }
 
@@ -84,13 +84,14 @@ class GameScene extends Phaser.Scene {
                     this.starsLeaderboard.getPlayerScore();
                     break;
             }
-            console.log("Leaderboard Loaded: " + leaderboard.name);
+            //console.log("Leaderboard Loaded: " + leaderboard.name);
         });
 
         //Add Background
         this.background = this.add.image(0, 0, 'menubg');
+        this.background.setOrigin(0, 0);
         this.background.setDisplaySize(this.cameras.main.displayWidth, this.cameras.main.displayHeight);
-        this.background.setScale(this.background.scaleX, this.background.scaleY);
+        //this.background.setScale(this.background.scaleX, this.background.scaleY);
 
         // Add Player
         this.player = this.physics.add.sprite(this.cameras.main.centerX, this.cameras.main.displayHeight * 0.7, 'player-idle');
@@ -214,6 +215,7 @@ class GameScene extends Phaser.Scene {
             btn.setDisplaySize(this.cameras.main.displayWidth/2, this.cameras.main.displayHeight);
             btn.onPointerUp(() => { this.movePlayer(0); });
             btn.onPointerOut(() => { this.movePlayer(0); });
+            btn.setDepth(30);
 
             this.buttons.push(btn);
             this.add.existing(btn);
@@ -277,7 +279,7 @@ class GameScene extends Phaser.Scene {
 
     updateCamera(){
         // Move Camera (C2 code)
-        if (this.player.y < this.lastUpScroll) { // Going Up
+        if (this.player.y < this.cameras.main.scrollY + this.cameras.main.centerY && this.player.body.velocity.y < 0) { // Going Up
             this.lastUpScroll = this.player.y;
             // Move the Camera
             this.cameras.main.scrollY = this.player.y - this.cameras.main.displayHeight/2;
@@ -288,7 +290,7 @@ class GameScene extends Phaser.Scene {
             this.scoreText.setText("Score: " + Math.ceil(this.score));
         } else if (this.player.y > this.cameras.main.scrollY + this.cameras.main.centerY) { // Going Down
             let downScroll = Math.abs(this.player.y - this.lastUpScroll);
-            console.log("Down: " + downScroll + " | Y: " + this.player.y + " | LU: " + this.lastUpScroll + "| Ds: " + this.deltaScroll);
+            //console.log("Down: " + downScroll + " | Y: " + this.player.y + " | LU: " + this.lastUpScroll + "| Ds: " + this.deltaScroll);
             if (downScroll < this.deltaScroll) {
                 // Move the Camera
                 this.cameras.main.scrollY = this.player.y - this.cameras.main.displayHeight/2;
@@ -444,7 +446,7 @@ class GameScene extends Phaser.Scene {
 
     gameOver() {
         this.dead = true;
-        console.log("GAME OVER");
+        //console.log("GAME OVER");
         this.player.disableBody(true, true);
 
         // Save Scores
