@@ -10,10 +10,10 @@ class GameScene extends Phaser.Scene {
     }
 
     difficult = {   // Represented by max "height", or the maximum score
-        VERY_EASY: 100,
-        EASY: 250,
-        NORMAL: 450,
-        HARD: 700,
+        VERY_EASY: 150,
+        EASY: 350,
+        NORMAL: 700,
+        HARD: 1000,
         VERY_HARD: 100000
     }
     
@@ -104,26 +104,30 @@ class GameScene extends Phaser.Scene {
         let _y = this.player.displayHeight * 0.18;
         let _w = this.player.displayWidth * 0.63;
         let _h = this.player.displayHeight * 0.78;
-        this.player.body.setOffset(_x, _y);
-        this.player.body.setSize(_w, _h);
+        // this.player.body.setOffset(_x, _y);
+        // this.player.body.setSize(_w, _h);
 
         // Animate Player
-        this.anims.create({
-            key: 'jump',
-            frames: [{ key: 'player-idle' }],
-            duration: 100
-        });
+        if (!this.anims.anims.contains('jump')){
+            this.anims.create({
+                key: 'jump',
+                frames: [{ key: 'player-idle' }],
+                duration: 100
+            });
 
-        this.player.on('animationcomplete', function(anim, frame, sprite){
-            sprite.anims.play('on-air');
-        });
+            this.player.on('animationcomplete', function(anim, frame, sprite){
+                sprite.anims.play('on-air');
+            });
+        }
 
-        this.anims.create({
-            key: 'on-air',
-            frames: [{ key: 'player-jump' }],
-            frameRate: 10,
-            repeat: -1
-        });
+        if (!this.anims.anims.contains('on-air')){
+            this.anims.create({
+                key: 'on-air',
+                frames: [{ key: 'player-jump' }],
+                frameRate: 10,
+                repeat: -1
+            });
+        }
         this.player.anims.play('on-air');
 
         //Add Floor of Platforms
@@ -156,16 +160,18 @@ class GameScene extends Phaser.Scene {
 
         // Anim Platforms
         for (let i = 1; i < 7; i++){
-            this.anims.create({
-                key: 'nube' + i,
-                frames: [
-                    { key: 'platform' + i },
-                    { key: 'platform' + i  + '-2'},
-                    { key: 'platform' + i  + '-3'}
-                ],
-                frameRate: 5,
-                repeat: -1
-            })
+            if (!this.anims.anims.contains('nube' + i)){
+                this.anims.create({
+                    key: 'nube' + i,
+                    frames: [
+                        { key: 'platform' + i },
+                        { key: 'platform' + i  + '-2'},
+                        { key: 'platform' + i  + '-3'}
+                    ],
+                    frameRate: 5,
+                    repeat: -1
+                })
+            }
         }
 
 
@@ -212,6 +218,8 @@ class GameScene extends Phaser.Scene {
         this.buttons = [];
         for (let i = 0; i < 2; i++){
             let btn = new ImageButton(this, this.cameras.main.displayWidth/2 * i, 0, 'transparent').setOrigin(0, 0);
+            // btn.setAlpha(0.3);
+            // btn.setTintFill(0x222222 * i);
             btn.setDisplaySize(this.cameras.main.displayWidth/2, this.cameras.main.displayHeight);
             btn.onPointerUp(() => { this.movePlayer(0); });
             btn.onPointerOut(() => { this.movePlayer(0); });
@@ -223,6 +231,7 @@ class GameScene extends Phaser.Scene {
 
         this.buttons[0].onPressed((time, delta) => { this.movePlayer(-1); });
         this.buttons[1].onPressed((time, delta) => { this.movePlayer(1); });
+        //console.log(this.buttons)
     }
 
     moveUI() {
@@ -243,7 +252,7 @@ class GameScene extends Phaser.Scene {
             return;
 
         // Update Buttons
-        this.buttons.forEach((item, _) => { item.update(); });
+        this.buttons.forEach((item, _) => { item.update(time, delta); });
         this.updateCamera();
         this.warpPlayer();
 
@@ -280,16 +289,18 @@ class GameScene extends Phaser.Scene {
     updateCamera(){
         // Move Camera (C2 code)
         if (this.player.y < this.cameras.main.scrollY + this.cameras.main.centerY && this.player.body.velocity.y < 0) { // Going Up
-            this.lastUpScroll = this.player.y;
             // Move the Camera
             this.cameras.main.scrollY = this.player.y - this.cameras.main.displayHeight/2;
             this.moveUI();
-
+            
             // Update Score
-            this.score = this.score + (this.lastUpScroll - this.cameras.main.scrollY) / 10000;
+            this.score = this.score + (this.lastUpScroll - this.cameras.main.scrollY) / 100;
             this.scoreText.setText("Score: " + Math.ceil(this.score));
+
+            console.log("Last: " + this.lastUpScroll + " | Cam: " + this.cameras.main.scrollY);
+            this.lastUpScroll = Math.min(this.lastUpScroll, this.cameras.main.scrollY);
         } else if (this.player.y > this.cameras.main.scrollY + this.cameras.main.centerY) { // Going Down
-            let downScroll = Math.abs(this.player.y - this.lastUpScroll);
+            let downScroll = Math.abs(this.player.y - this.lastUpScroll + this.cameras.main.centerY);
             //console.log("Down: " + downScroll + " | Y: " + this.player.y + " | LU: " + this.lastUpScroll + "| Ds: " + this.deltaScroll);
             if (downScroll < this.deltaScroll) {
                 // Move the Camera
@@ -324,7 +335,7 @@ class GameScene extends Phaser.Scene {
     }
 
     playerHitPlatform(player, platform){
-        let delta = platform.displayHeight * 0.05;
+        let delta = platform.displayHeight * 0.1;
         if (platform.body.top + delta < player.body.bottom) {
             return;
         }
@@ -464,6 +475,7 @@ class GameScene extends Phaser.Scene {
         this.scoreText.setVisible(false);
         this.starScoreIcon.setVisible(false);
         this.starScoreText.setVisible(false);
+        this.buttons.forEach((item, _) => { item.setVisible(false); });
 
         ///////////////////////////////////////////////////////////////////////
         // Draw Game Over Screen
