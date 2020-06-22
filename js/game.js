@@ -297,7 +297,7 @@ class GameScene extends Phaser.Scene {
             this.score = this.score + (this.lastUpScroll - this.cameras.main.scrollY) / 100;
             this.scoreText.setText("Score: " + Math.ceil(this.score));
 
-            console.log("Last: " + this.lastUpScroll + " | Cam: " + this.cameras.main.scrollY);
+            // console.log("Last: " + this.lastUpScroll + " | Cam: " + this.cameras.main.scrollY);
             this.lastUpScroll = Math.min(this.lastUpScroll, this.cameras.main.scrollY);
         } else if (this.player.y > this.cameras.main.scrollY + this.cameras.main.centerY) { // Going Down
             let downScroll = Math.abs(this.player.y - this.lastUpScroll + this.cameras.main.centerY);

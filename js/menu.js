@@ -45,12 +45,6 @@ class MainMenu extends Phaser.Scene {
         this.tt = this.add.image(this.cameras.main.displayWidth - 10, this.cameras.main.displayHeight - 10, 'tt').setOrigin(1, 1);
         this.tt.setDisplaySize(10, this.cameras.main.displayHeight * 0.05);
         this.tt.setScale(this.tt.scaleY);
-
-        //Bottom Zone Variables
-        let bottomZoneHeight = this.cameras.main.displayHeight * 0.22;
-        let bottomZonePadding = [0, 10, 10, 90];    // Top, Left, Right, Bottom
-        let bottomZoneSpacing = 30;
-        let tempZoneHeight = bottomZoneHeight - (bottomZonePadding[0] + bottomZonePadding[3] + bottomZoneSpacing * 1);
         
         ///////////////////////////////////////////////////////////////////////
         // Play Button
