@@ -1,4 +1,4 @@
-# 'Stuffie Wishes'
+# Stuffie Wishes
 
 <img src="promo/cover.jpg">
 
@@ -11,7 +11,7 @@ Collect the stars as you are making your way to the top!
 ## Controls
 Touch / Click the screen to move Stuffie to the left or right.
 
-<img src="promo/screen02.jpg" width="350">
+<img src="promo/screen02.png" width="350">
 
 ## GitHub
 
