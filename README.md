@@ -15,10 +15,10 @@ Touch / Click the screen to move Stuffie to the left or right.
 
 ## GitHub
 
-This repo contains the code made by this project, as well as future updates the game may have.
+This repo contains the code made by this project, as well as future updates the game may have.</br>
 This game was made using Phaser 3
 
 ## Credits
 
-**Font:** *Set fire to the Rain* made by [Kimberly Geswein](http://www.kimberlygeswein.com/)
+**Font:** *Set fire to the Rain* made by [Kimberly Geswein](http://www.kimberlygeswein.com/)</br>
 All the other assets are propierty of Team Tallarin.
